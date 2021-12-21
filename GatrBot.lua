@@ -1,112 +1,18 @@
+dofile("Utils.lua")
 dofile ("Route.lua")
 
-function read(addr, size)
-  mem = ""
-  memdomain = bit.rshift(addr, 24)
-  if memdomain == 0 then
-    mem = "BIOS"
-  elseif memdomain == 2 then
-    mem = "EWRAM"
-  elseif memdomain == 3 then
-    mem = "IWRAM"
-  elseif memdomain == 8 then
-    mem = "ROM"
-  end
-  addr = bit.band(addr, 0xFFFFFF)
-  if size == 1 then
-    return memory.read_u8(addr,mem)
-  elseif size == 2 then
-    return memory.read_u16_le(addr,mem)
-  elseif size == 3 then
-    return memory.read_u24_le(addr,mem)
-  else
-    return memory.read_u32_le(addr,mem)
-  end 
+if not isdir("log") then
+  os.execute("mkdir log")
 end
-
 log_file = io.open(os.date("log/output_%Y%m%d%H%M%S.log"), "a")
 io.output(log_file)
 loglevel="DEBUG"
 
-function log(txt)
-  io.write(tostring(txt))
-  io.write("\n")
---  print(txt)
-end
-
-function debug(txt)
-  if loglevel=="DEBUG" then
-    log(txt)
-  end
-end
-
-function logTable(t, level)
-  level = level or 0
-  for key, value in pairs(t) do
-    toPrint = ""
-    for i = 0,level,1 do
-      toPrint = toPrint .. '\t'
-    end
-    toPrint = toPrint .. key .. ":"
-    if type(value) == "table" then
-      log(toPrint)
-      logTable(value, level + 1)
-    else
-      toPrint = toPrint .. tostring(value)
-      log(toPrint)
-    end
-  end
-end
-
-function printTable(t, level)
-  level = level or 0
-  for key, value in pairs(t) do
-    toPrint = ""
-    for i = 0,level,1 do
-      toPrint = toPrint .. '\t'
-    end
-    toPrint = toPrint .. key .. ":"
-    if type(value) == "table" then
-      print(toPrint)
-      printTable(value, level + 1)
-    else
-      toPrint = toPrint .. tostring(value)
-      print(toPrint)
-    end
-  end
-end
-
-function debugTable(t, level)
-  if loglevel=="DEBUG" then
-    level = level or 0
-    logTable(t, level)
-  end
-end
-
-function deepcopy(orig)
-  local orig_type = type(orig)
-  local copy
-  if orig_type == 'table' then
-    copy = {}
-    for orig_key, orig_value in next, orig, nil do
-        copy[deepcopy(orig_key)] = deepcopy(orig_value)
-    end
-    setmetatable(copy, deepcopy(getmetatable(orig)))
-  else -- number, string, boolean, etc
-    copy = orig
-  end
-  return copy
-end
-
-function runTest(inputs, targetStates)
+function runTest(inputs, runToFrame, targetStates)
   tastudio.loadbranch(0)
-  runToFrame = -1
   for f, i in pairs(inputs) do--TODO logic to handle multi-inputs
     if i ~= "NO_INPUT" then
       tastudio.submitinputchange(f, i, true)
-    end
-    if f > runToFrame then
-      runToFrame = f + 1
     end
   end
   tastudio.applyinputchanges()
@@ -121,12 +27,12 @@ function runTest(inputs, targetStates)
   while stillValid and (index <= table.getn(targetStates)) do
     targetState = targetStates[index]
     debug("inputs = ")
-    debugTable(inputs)
+    debugTable(inputs, 1)
     debug("register = " .. targetState["register"])
     debug("numBytes = " .. targetState["numBytes"])
     debug("expectedValue = " .. targetState["expectedValue"])
     debug("actualValue = " .. read(targetState["register"], targetState["numBytes"]))
-    stillValid = (read(targetState["register"], targetState["numBytes"]) == targetState["expectedValue"])
+    stillValid = (read(targetState["register"], targetState["numBytes"]) == targetState["expectedValue"])    
     if stillValid then
       debug("Passed targetState " .. index)
     else
@@ -142,6 +48,7 @@ tastudio.setrecording(false)
 subgoals = Route.subgoals
 maxFrame = Route.startFrame + Route.totalMaxFrames
 
+tastudio.loadbranch(0)
 while emu.framecount() < Route.startFrame do
   emu.frameadvance()
 end
@@ -160,19 +67,18 @@ possibleBranches = { -- all branches that have not yet failed to reach the targe
   }
 }
 
-
 for index, subgoal in pairs(subgoals) do
-  
   log("\nSubgoal " .. index .. ": " .. subgoal["name"])
-  
   inputs = subgoal["permittedInputs"]
   debug("Possible Inputs:", 1)
-  debugTable(inputs, 1)
+  debugTable(inputs, 2)
+  log("")
+  
   while table.getn(possibleBranches) ~= 0 do
     x = table.getn(possibleBranches)
     for j = x, 1, -1 do
       for k, inp in pairs(inputs) do
-        maxFrameForSubgoal = possibleBranches[j]["startFrame"] + subgoal["numFrames"]
+        maxFrameForSubgoal = possibleBranches[j]["startFrame"] + subgoal["numFrames"]--TODO tweak this logic for when we are not on the first subgoal
         if maxFrameForSubgoal > maxFrame then
           maxFrameForSubgoal = maxFrame
         end
@@ -181,27 +87,27 @@ for index, subgoal in pairs(subgoals) do
         else
           f = possibleBranches[j]["frame"]
           i = deepcopy(possibleBranches[j]["inputs"])
-          i[f] = inp --I will defer handling multi-inputs (e.g. holding B to run) to the runTest function
-          
+          i[f] = inp --I will defer handling multi-inputs (e.g. holding B and moving to run) to the runTest function
           newBranch = {
             startFrame = possibleBranches[j]["startFrame"],
             frame = f + 1,
             inputs = i
           }
-          if runTest(i, subgoal["targetState"]) then
-            log("Successful Inputs", 1)
-            logTable(newBranch, 1)
+          
+          if runTest(i, newBranch["frame"], subgoal["targetState"]) then
+            debug("Successful Inputs", 1)
+            debugTable(newBranch, 1)
             table.insert(viableBranches, newBranch)
           else 
-            log("Not-yet-successful Inputs", 1)
-            logTable(newBranch, 1)
+            debug("Not-yet-successful Inputs", 1)
+            debugTable(newBranch, 1)
             table.insert(possibleBranches, newBranch)
           end
           
           possibleBranches[j]["inputs"][f] = "NO_INPUT"
           possibleBranches[j]["frame"] = possibleBranches[j]["frame"] + 1
-          log("possibleBranches[" .. j .. "]:", 1)
-          logTable(possibleBranches[j], 1)
+          debug("possibleBranches[" .. j .. "]:", 1)
+          debugTable(possibleBranches[j], 1)
           --is there ever a case where I would want to test after adding a no-input?
         end
       end
@@ -209,12 +115,33 @@ for index, subgoal in pairs(subgoals) do
   end
   
   log("There are " .. table.getn(viableBranches) .. " options after subgoal " .. index)
-  logTable(viableBranches, 1)
-  if index ~= table.getn(subgoals) then
+  debugTable(viableBranches, 1)
+  
+  if index ~= table.getn(subgoals) then--TODO maybe use extra pointers that swap at the end, so that we don't have to run this deepcopy?
     possibleBranches = deepcopy(viableBranches)
     viableBranches = {}
   end
+  
+  --TODO should we garbage collect at the end of this loop?
 end
 
+--TODO prune branches by which ones end soonest
+--TODO sort (and maybe prune?) branches by fewest inputs?
+
+-- summarize the surviving possibleBranches
+--TODO maybe once there are longer (and fewer) branches, a CSV view would be more helpful?
+log("\Viable Branches at end of search:")
+for k, viableBranch in pairs(viableBranches) do
+  log("Branch " .. k)
+  totalFrames = viableBranch["frame"] - Route.startFrame
+  log("Total Frames:" .. totalFrames, 1)
+  log("Inputs:", 1)
+  index = Route.startFrame
+  while index < viableBranch["frame"] do
+    log(index .. ":" .. viableBranch["inputs"][index], 2)    
+    index = index + 1
+  end
+  log("")
+end
 
 io.close(log_file)
