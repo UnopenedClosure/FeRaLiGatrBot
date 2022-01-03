@@ -1,21 +1,83 @@
-dofile ("Data.lua")
-dofile ("Subgoal.lua")
-
 -- targetStates and subgoals which are used frequently
 -- are defined in separate files for clarity and
 -- repeatability
 
 Route = {
   startFrame = 491200,
-  totalMaxFrames = 9500, -- this is the total frames allowed for meeting all subgoals
+  totalMaxFrames = 102,
+--  totalMaxFrames = 9500, -- this is the total frames allowed for meeting all subgoals
+--allow 255 frames for first movement inside PC
 
 -- Subgoals are achieved from first to last
---                    
--- After all successConditions have been met,
--- we will choose the shortest option
   subgoals = {
+    Subgoal.waitFrames(3),
     Subgoal.getOnBike(),
---[[    {
+    {
+      name = "go up",
+      targetState = {
+        TargetState.yCoord(24),
+        TargetState.direction("Up")
+      },
+      numFrames = 1,
+      permittedInputs = {"Up"}
+    },
+    {
+      name = "go towards stairs",
+      targetState = {
+        TargetState.yCoord(23)
+      },
+      numFrames = 15,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go onto stairs",
+      targetState = {
+        TargetState.yCoord(22),
+      },
+      numFrames = 15,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go up stairs",
+      targetState = {
+        TargetState.yCoord(21),
+      },
+      numFrames = 15,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go past stairs",
+      targetState = {
+        TargetState.yCoord(20),
+      },
+      numFrames = 19,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go up",
+      targetState = {
+        TargetState.yCoord(19),
+      },
+      numFrames = 19,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go up",
+      targetState = {
+        TargetState.yCoord(18),
+      },
+      numFrames = 19,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go up",
+      targetState = {
+        TargetState.yCoord(17),
+      },
+      numFrames = 19,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
       name = "navigate to Pokemon Center",
       targetState = {
         TargetState.map("OneIsland"),
@@ -23,8 +85,39 @@ Route = {
         TargetState.yCoord(13),
         TargetState.direction("Up")
       },
-      numFrames = 200,
-      permittedInputs = {Up=true, Right=true}
+      numFrames = 70,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go into Pokemon Center",
+      targetState = {
+        TargetState.yCoord(12),
+      },
+      numFrames = 10,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up"}
+    }
+--[[    
+    Subgoal.waitFrames(5),
+    {
+      name = "navigate up stairs",
+      targetState = {
+        TargetState.yCoord(21),
+        TargetState.direction("Up")
+      },
+      numFrames = 20,
+      permittedInputs = {"Up", "Right"}
+    },
+    Subgoal.waitFrames(7),
+    {
+      name = "navigate to Pokemon Center",
+      targetState = {
+        TargetState.map("OneIsland"),
+        TargetState.xCoord(21),
+        TargetState.yCoord(13),
+        TargetState.direction("Up")
+      },
+      numFrames = 163,
+      permittedInputs = {"Up", "Right"}
     },--]]
 --[[    {
       name = "enter Pokemon Center",-- checking to see if bike dismount is faster
@@ -34,7 +127,7 @@ Route = {
         TargetState.yCoord(15)
       },
       numFrames = 180,
-      permittedInputs = {Select=true, Up=true}
+      permittedInputs = {"Select", "Up"}
     },
     {
       name = "move to Celio",
@@ -44,7 +137,7 @@ Route = {
         TargetState.direction("Right")
       },
       numFrames = 140,
-      permittedInputs = {Up=true, Right=true}
+      permittedInputs = {"Up", "Right"}
     },
     Subgoal.textbox("CELIO"),
     Subgoal.textbox("I'm", 200),
@@ -57,7 +150,7 @@ Route = {
         TargetState.direction("Left")
       },
       numFrames = 200,
-      permittedInputs = {A=true, Left=true}
+      permittedInputs = {"A", "Left"}
     },
     {
       name = "exit Pokemon Center",
@@ -68,7 +161,7 @@ Route = {
         TargetState.direction("Down")
       },
       numFrames = 200,
-      permittedInputs = {Down=true, Left=true}
+      permittedInputs = {"Down", "Left"}
     },
     Subgoal.getOnBike(),
     {
@@ -80,7 +173,7 @@ Route = {
         TargetState.direction("Right")
       },
       numFrames = 120,
-      permittedInputs = {Down=true, Right=true}
+      permittedInputs = {"Down", "Right"}
     },
     {
       name = "turn towards water",
@@ -89,7 +182,7 @@ Route = {
         TargetState.yCoord(138)
       },
       numFrames = 8,
-      permittedInputs = {Up=true}
+      permittedInputs = {"Up"}
     },
     Subgoal.startSurfing(),
     {
@@ -100,7 +193,7 @@ Route = {
         TargetState.direction("Up")
       },
       numFrames = 240,
-      permittedInputs = {Up=true, Right=true}
+      permittedInputs = {"Up", "Right"}
     },
     {
       name = "get out of water and onto bike",
@@ -109,7 +202,7 @@ Route = {
         TargetState.spriteIsOnBike()
       },
       numFrames = 60,
-      permittedInputs = {Up=true, Select=true}
+      permittedInputs = {"Up", "Select"}
     },
     {
       name = "use super repel",
@@ -137,7 +230,7 @@ Route = {
         },
       },
       numFrames = 150,
-      permittedInputs = {Down=true, Start=true, Select=true, A=true, B=true}
+      permittedInputs = {"Down", "Start", "Select", "A", "B"}
     },
     {
       name = "leave menus",
@@ -145,7 +238,7 @@ Route = {
         TargetState.yCoord(129)
       },
       numFrames = 120,
-      permittedInputs = {Up=true, B=true}
+      permittedInputs = {"Up", "B"}
     },
     {
       name = "bike past spinners",
@@ -155,7 +248,7 @@ Route = {
         TargetState.direction("Up")
       },
       numFrames = 550,
-      permittedInputs = {Up=true, Left=true, Right=true}
+      permittedInputs = {"Up", "Left", "Right"}
     },
     Subgoal.startSurfing(),
     {
@@ -166,7 +259,7 @@ Route = {
         TargetState.direction("Up")
       },
       numFrames = 270,
-      permittedInputs = {Up=true, Left=true}
+      permittedInputs = {"Up", "Left"}
     },
     Subgoal.waitFrames(25),
     Subgoal.getOnBike(),
@@ -178,9 +271,9 @@ Route = {
         TargetState.direction("Up")
       },
       numFrames = 100,
-      permittedInputs = {Up=true, Right=true}
+      permittedInputs = {"Up", "Right"}
     },
-    Subgoal.textbox("MT. EMBER", 80, {Up=true}),
+    Subgoal.textbox("MT. EMBER", 80, {"Up"}),
     Subgoal.waitFrames(16),
     {
       name = "skip picture",
@@ -189,9 +282,9 @@ Route = {
         TargetState.yCoord(54),
       },
       numFrames = 100,
-      permittedInputs = {Up=true, B=true}
+      permittedInputs = {"Up", "B"}
     },
-    Subgoal.textbox("Whew,", 100, {Up=true, Right=true}),
+    Subgoal.textbox("Whew,", 100, {"Up", "Right"}),
     Subgoal.textbox("Any", 100),
     Subgoal.textbox("What,", 140),
     Subgoal.textbox("Hey", 190),
@@ -205,7 +298,7 @@ Route = {
         TargetState.yCoord(49),
       },
       numFrames = 10,
-      permittedInputs = {A=true, Up=true}
+      permittedInputs = {"A", "Up"}
     },
     {
       name = "move towards grunts",
@@ -215,7 +308,7 @@ Route = {
         TargetState.direction("Up")
       },
       numFrames = 30,
-      permittedInputs = {Right=true, Up=true}
+      permittedInputs = {"Right", "Up"}
     },--]]
 --[[Commenting these out for now because I haven't figured out this implementation yet
     Subgoal.startOfBattle("Cubone"),
@@ -226,7 +319,7 @@ Route = {
         -- TODO check for Cubone's remaining HP to be 0
       },
       numFrames = 760,
-      permittedInputs = {A=true, Up=true, Down=true}
+      permittedInputs = {"A", "Up", "Down"}
     },
     {
       name = "punch Marowak",
@@ -235,18 +328,18 @@ Route = {
         -- TODO check for Marowak's remaining HP to be 0
       },
       numFrames = 640,
-      permittedInputs = {A=true, Up=true, Down=true}
+      permittedInputs = {"A", "Up", "Down"}
     },
     Subgoal.textbox("Why", 480),
     Subgoal.waitFrames(25),
-    Subgoal.textbox("Trying,", 20, {Up=true, Right=true, A=true}),
+    Subgoal.textbox("Trying,", 20, {"Up", "Right", "A"}),
     {
       name = "start fight",
       targetState = {
         -- TODO check for Rattata in enemy slot 1
       },
       numFrames = 180,
-      permittedInputs = {A=true}
+      permittedInputs = {"A"}
     },
     {
       name = "punch Rattata",
@@ -255,7 +348,7 @@ Route = {
         -- TODO check for Rattata's remaining HP to be 0
       },
       numFrames = 760,
-      permittedInputs = {A=true, Up=true, Down=true}
+      permittedInputs = {"A", "Up", "Down"}
     },
     {
       name = "punch Raticate",
@@ -264,7 +357,7 @@ Route = {
         -- TODO check for Raticate's remaining HP to be 0
       },
       numFrames = 680,
-      permittedInputs = {A=true, Up=true, Down=true}
+      permittedInputs = {"A", "Up", "Down"}
     },
     {
       name = "punch Sandshrew",
@@ -273,7 +366,7 @@ Route = {
         -- TODO check for Sandshrew's remaining HP to be 0
       },
       numFrames = 680,
-      permittedInputs = {A=true, Up=true, Down=true}
+      permittedInputs = {"A", "Up", "Down"}
     },
     {
       name = "punch Sandslash",
@@ -282,7 +375,7 @@ Route = {
         -- TODO check for Sandslash's remaining HP to be 0
       },
       numFrames = 680,
-      permittedInputs = {A=true, Up=true, Down=true}
+      permittedInputs = {"A", "Up", "Down"}
     },
     Subgoal.textbox("What a setback", 550),
     {
@@ -293,7 +386,7 @@ Route = {
         TargetState.direction("Up")
       },
       numFrames = 220,--?????????????????
-      permittedInputs = {A=true, Up=true}
+      permittedInputs = {"A", "Up"}
     }
     --now we are inside the Mt. Ember interior--]]
   }

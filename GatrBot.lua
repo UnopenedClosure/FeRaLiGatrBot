@@ -1,62 +1,47 @@
-dofile("Utils.lua")
+dofile ("Utils.lua")
+dofile ("Data.lua")
+dofile ("TargetState.lua")
+dofile ("Subgoal.lua")
 dofile ("Route.lua")
 
 if not isdir("log") then
   os.execute("mkdir log")
 end
-log_file = io.open(os.date("log/output_%Y%m%d%H%M%S.log"), "a")
+local log_file = io.open(os.date("log/branches_%Y%m%d%H%M%S.lua"), "a")
 io.output(log_file)
-loglevel="DEBUG"
+local loglevel="DEBUG"
 
-function runTest(inputs, runToFrame, targetStates)
+--TODO rename files and remove old lua files
+--TODO add dead-end indication logic?????
+--TODO load possible branches from the generated branches_YYYYMMDDHHMMSS.lua
+
+function runTest(inps, runToFrame, targetStates)
   tastudio.loadbranch(0)
-  for f, i in pairs(inputs) do--TODO logic to handle multi-inputs
-    if i ~= "NO_INPUT" then
-      tastudio.submitinputchange(f, i, true)
+  for g, a in pairs(inps) do
+    if a ~= "NO_INPUT" then
+      tastudio.submitinputchange(g, a, true)
     end
   end
   tastudio.applyinputchanges()
-  
-  while emu.framecount() < runToFrame do
-    emu.frameadvance()
-  end
-  
-  stillValid = true
-  index = 1
+  advanceToFrame(runToFrame)
+  local stillValid = true
+  local idx = 1
   local targetState = nil
-  while stillValid and (index <= table.getn(targetStates)) do
-    targetState = targetStates[index]
-    debug("inputs = ")
-    debugTable(inputs, 1)
-    debug("register = " .. targetState["register"])
-    debug("numBytes = " .. targetState["numBytes"])
-    debug("expectedValue = " .. targetState["expectedValue"])
-    debug("actualValue = " .. read(targetState["register"], targetState["numBytes"]))
+  while stillValid and (idx <= table.getn(targetStates)) do
+    targetState = targetStates[idx]
     stillValid = (read(targetState["register"], targetState["numBytes"]) == targetState["expectedValue"])    
-    if stillValid then
-      debug("Passed targetState " .. index)
-    else
-      debug("Failed targetState " .. index)
-    end
-    index = index + 1
+    idx = idx + 1
   end
   return stillValid
 end
 
+local subgoals = Route.subgoals
+local maxFrame = Route.startFrame + Route.totalMaxFrames
+
 tastudio.setrecording(false)
-
-subgoals = Route.subgoals
-maxFrame = Route.startFrame + Route.totalMaxFrames
-
 tastudio.loadbranch(0)
-while emu.framecount() < Route.startFrame do
-  emu.frameadvance()
-end
-currentFrame = emu.framecount()
-
-log("Initial frame " .. Route.startFrame)
-log("Searching until frame " .. maxFrame)
-log(table.getn(subgoals) .. " subgoals to achieve")
+advanceToFrame(Route.startFrame)
+local currentFrame = emu.framecount()
 
 viableBranches = {} -- all branches that have successfully reached the targetStates by maxFrameForSubgoal
 possibleBranches = { -- all branches that have not yet failed to reach the targetStates by maxFrameForSubgoal
@@ -67,81 +52,104 @@ possibleBranches = { -- all branches that have not yet failed to reach the targe
   }
 }
 
+local startTime = os.clock()
+local passCount = 0
+local subgoalCount = table.getn(subgoals)
+log("subgoalCount = " .. subgoalCount)
 for index, subgoal in pairs(subgoals) do
-  log("\nSubgoal " .. index .. ": " .. subgoal["name"])
-  inputs = subgoal["permittedInputs"]
-  debug("Possible Inputs:", 1)
-  debugTable(inputs, 2)
-  log("")
-  
-  while table.getn(possibleBranches) ~= 0 do
-    x = table.getn(possibleBranches)
-    for j = x, 1, -1 do
-      for k, inp in pairs(inputs) do
-        maxFrameForSubgoal = possibleBranches[j]["startFrame"] + subgoal["numFrames"]--TODO tweak this logic for when we are not on the first subgoal
-        if maxFrameForSubgoal > maxFrame then
-          maxFrameForSubgoal = maxFrame
+  console.clear()
+  local waitInd1 = string.find(subgoal["name"], "wait ")
+  if waitInd1 then
+    local waitInd2 = string.find(subgoal["name"], " frames")
+    if waitInd2 ~= null then
+      local numF = string.sub(subgoal["name"], 6, (waitInd2 - 1))
+      for i, branch in pairs(possibleBranches) do
+        local startF = branch["startFrame"]
+        for m=1, tonumber(numF), 1 do
+          branch["inputs"][startF + m - 1] = "NO_INPUT"
         end
-        if possibleBranches[j]["frame"] >= maxFrameForSubgoal then
-          table.remove(possibleBranches, j)
-        else
-          f = possibleBranches[j]["frame"]
-          i = deepcopy(possibleBranches[j]["inputs"])
-          i[f] = inp --I will defer handling multi-inputs (e.g. holding B and moving to run) to the runTest function
-          newBranch = {
-            startFrame = possibleBranches[j]["startFrame"],
-            frame = f + 1,
-            inputs = i
-          }
-          
-          if runTest(i, newBranch["frame"], subgoal["targetState"]) then
-            debug("Successful Inputs", 1)
-            debugTable(newBranch, 1)
-            table.insert(viableBranches, newBranch)
-          else 
-            debug("Not-yet-successful Inputs", 1)
-            debugTable(newBranch, 1)
-            table.insert(possibleBranches, newBranch)
+        branch["startFrame"] = startF + numF
+        branch["frame"] = branch["frame"] + numF
+        table.insert(viableBranches, branch)
+      end
+    end
+  else
+    local permittedInputs = subgoal["permittedInputs"]    
+    while table.getn(possibleBranches) ~= 0 do
+      local x = table.getn(possibleBranches)
+      for j = x, 1, -1 do
+        for k, inp in pairs(permittedInputs) do
+          local prefix = "Subgoal " .. index .. " of " .. subgoalCount .. ", j.k = " .. j .. "." .. k .. ", "
+          local branchStatus = ""--TODO fix minor bug which sometimes keeps this blank
+          local maxFrameForSubgoal = possibleBranches[j]["startFrame"] + subgoal["numFrames"]
+          if maxFrameForSubgoal > maxFrame then
+            maxFrameForSubgoal = maxFrame
           end
-          
-          possibleBranches[j]["inputs"][f] = "NO_INPUT"
+          if possibleBranches[j]["frame"] >= maxFrameForSubgoal then
+            table.remove(possibleBranches, j)
+            branchStatus = "branch was removed"
+            break
+          else
+            local f = possibleBranches[j]["frame"]
+            local i = deepcopy(possibleBranches[j]["inputs"])
+            local delimitedInputs = split(inp)
+            for q, r in pairs(delimitedInputs) do
+              i[f] = r
+              f = f + 1
+            end
+            if f <= maxFrameForSubgoal then
+              local newBranch = {
+                startFrame = possibleBranches[j]["startFrame"],
+                frame = f,
+                inputs = i
+              }
+              if runTest(i, newBranch["frame"], subgoal["targetState"]) then
+                table.insert(viableBranches, newBranch)
+                branchStatus = "branch was viable"
+              else
+                table.insert(possibleBranches, newBranch)
+                branchStatus = "branch was not yet viable"
+              end
+            end
+          end
+          print(prefix .. branchStatus .. ", " .. table.getn(viableBranches) .. " viable branches, " .. table.getn(possibleBranches) .. " possible branches")          
+          passCount = passCount + 1
+          if passCount % 1000 == 0 then
+         --   console.clear()
+            displayTimeElapsed(startTime)
+          end
+        end
+        if possibleBranches[j] ~= nil then
+          possibleBranches[j]["inputs"][possibleBranches[j]["frame"]] = "NO_INPUT"
           possibleBranches[j]["frame"] = possibleBranches[j]["frame"] + 1
-          debug("possibleBranches[" .. j .. "]:", 1)
-          debugTable(possibleBranches[j], 1)
-          --is there ever a case where I would want to test after adding a no-input?
         end
       end
     end
   end
-  
-  log("There are " .. table.getn(viableBranches) .. " options after subgoal " .. index)
-  debugTable(viableBranches, 1)
-  
-  if index ~= table.getn(subgoals) then--TODO maybe use extra pointers that swap at the end, so that we don't have to run this deepcopy?
+    
+  if index ~= table.getn(subgoals) then
     possibleBranches = deepcopy(viableBranches)
+    for i, branch in pairs(possibleBranches) do
+      branch["startFrame"] = branch["frame"]
+    end
     viableBranches = {}
-  end
-  
-  --TODO should we garbage collect at the end of this loop?
+  end 
+  collectgarbage()
 end
+displayTimeElapsed(startTime)
 
---TODO prune branches by which ones end soonest
+--TODO prune branches by which ones take longest????
 --TODO sort (and maybe prune?) branches by fewest inputs?
+--TODO fix generated lua file's input keys
 
--- summarize the surviving possibleBranches
---TODO maybe once there are longer (and fewer) branches, a CSV view would be more helpful?
-log("\Viable Branches at end of search:")
+-- list the surviving possibleBranches
+log("possibleBranches = {")
 for k, viableBranch in pairs(viableBranches) do
-  log("Branch " .. k)
-  totalFrames = viableBranch["frame"] - Route.startFrame
-  log("Total Frames:" .. totalFrames, 1)
-  log("Inputs:", 1)
-  index = Route.startFrame
-  while index < viableBranch["frame"] do
-    log(index .. ":" .. viableBranch["inputs"][index], 2)    
-    index = index + 1
-  end
-  log("")
+  log("{", 1)
+  logTable(viableBranch, 2)
+  log("},", 1)
 end
-
+log("}")
 io.close(log_file)
+
+client.pause()

@@ -33,19 +33,20 @@ function debug(txt, level)
   end
 end
 
-function logTable(t, level)
+function logTable(t, level, inputsFlag)
   level = level or 0
   for key, value in pairs(t) do
     toPrint = ""
     for i = 1, level,1 do
       toPrint = toPrint .. '\t'
     end
-    toPrint = toPrint .. key .. ":"
+    toPrint = toPrint .. key .. " = "
     if type(value) == "table" then
-      log(toPrint)
+      log(toPrint .. "{")
       logTable(value, level + 1)
+      log("\t\t}")
     else
-      toPrint = toPrint .. tostring(value)
+      toPrint = toPrint .. tostring(value) .. ","
       log(toPrint)
     end
   end
@@ -74,6 +75,11 @@ function printTable(t, level)
       print(toPrint)
     end
   end
+end
+
+function displayTimeElapsed(startTime)
+  currentTime = os.clock()
+  print(string.format("Elapsed time: %.2f seconds", (currentTime - startTime)))
 end
 
 -------------
@@ -117,4 +123,21 @@ function deepcopy(orig)
     copy = orig
   end
   return copy
+end
+
+function split(inputstr, sep)
+  sep=sep or ','
+  local t={}
+  for field, s in string.gmatch(inputstr, "([^" .. sep .. "]*)(" .. sep .. "?)") do
+    table.insert(t, field)
+  if s=="" then
+    return t
+  end
+  end
+end
+
+function advanceToFrame(targetFrame)
+  while emu.framecount() < targetFrame do
+    emu.frameadvance()
+  end
 end
