@@ -33,7 +33,7 @@ function debug(txt, level)
   end
 end
 
-function logTable(t, level, inputsFlag)
+function logTable(t, level)
   level = level or 0
   for key, value in pairs(t) do
     toPrint = ""
@@ -136,6 +136,7 @@ function split(inputstr, sep)
   end
 end
 
+--TODO is it faster to use tastudio.setmarker(targetFrame) ?
 function advanceToFrame(targetFrame)
   while emu.framecount() < targetFrame do
     emu.frameadvance()

@@ -11,7 +11,6 @@ local log_file = io.open(os.date("log/branches_%Y%m%d%H%M%S.lua"), "a")
 io.output(log_file)
 local loglevel="DEBUG"
 
---TODO rename files and remove old lua files
 --TODO add dead-end indication logic?????
 --TODO load possible branches from the generated branches_YYYYMMDDHHMMSS.lua
 
@@ -29,6 +28,7 @@ function runTest(inps, runToFrame, targetStates)
   local targetState = nil
   while stillValid and (idx <= table.getn(targetStates)) do
     targetState = targetStates[idx]
+    --TODO search for one of several expectedValues (e.g. manipping for one of a few trainer IDs)
     stillValid = (read(targetState["register"], targetState["numBytes"]) == targetState["expectedValue"])    
     idx = idx + 1
   end
@@ -79,6 +79,7 @@ for index, subgoal in pairs(subgoals) do
       local x = table.getn(possibleBranches)
       for j = x, 1, -1 do
         for k, inp in pairs(permittedInputs) do
+        --TODO handle frames with more than one input (e.g. running)
           local prefix = "Subgoal " .. index .. " of " .. subgoalCount .. ", j.k = " .. j .. "." .. k .. ", "
           local branchStatus = ""--TODO fix minor bug which sometimes keeps this blank
           local maxFrameForSubgoal = possibleBranches[j]["startFrame"] + subgoal["numFrames"]
@@ -126,7 +127,8 @@ for index, subgoal in pairs(subgoals) do
       end
     end
   end
-    
+  
+  --TODO performance improvement? - maintain two pointers and swap them, instead of deep-copying the tables  
   if index ~= table.getn(subgoals) then
     possibleBranches = deepcopy(viableBranches)
     for i, branch in pairs(possibleBranches) do
@@ -138,15 +140,39 @@ for index, subgoal in pairs(subgoals) do
 end
 displayTimeElapsed(startTime)
 
---TODO prune branches by which ones take longest????
---TODO sort (and maybe prune?) branches by fewest inputs?
---TODO fix generated lua file's input keys
+--TODO sort branches by fewest inputs????
+--TODO unfinished work - fix generated lua file's input keys (I think this is done, but I haven't tested it yet)
+
+function printBranchesToFile(t, level, inputsFlag)
+  level = level or 0
+  --TODO print inputs in order????
+  for key, value in pairs(t) do
+    toPrint = ""
+    for i = 1, level,1 do
+      toPrint = toPrint .. '\t'
+    end
+    toPrint = toPrint .. '[' .. key .. '] = "'
+    if type(value) == "table" then
+      log(toPrint .. "{")
+      if key == "inputs" then
+        printBranchesToFile(value, level + 1, true)
+      else
+        printBranchesToFile(value, level + 1, false)
+      end
+      log("\t\t}")
+    else
+      toPrint = toPrint .. tostring(value) .. '",'
+      log(toPrint)
+    end
+  end
+end
 
 -- list the surviving possibleBranches
+--TODO sort the branches in ascending order by frame before printing????
 log("possibleBranches = {")
 for k, viableBranch in pairs(viableBranches) do
   log("{", 1)
-  logTable(viableBranch, 2)
+  printBranchesToFile(viableBranch, 2)
   log("},", 1)
 end
 log("}")
