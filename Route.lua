@@ -3,41 +3,46 @@
 -- repeatability
 
 Route = {
-  startFrame = 530,
-  totalMaxFrames = 380,
+  startFrame = 491203,
+  totalMaxFrames = 53,
+--  totalMaxFrames = 9500, -- this is the total frames allowed for meeting all subgoals
+--allow 255 frames for first movement inside PC
 
 -- Subgoals are achieved from first to last
   subgoals = {
-    Subgoal.waitFrames(4),
-    Subgoal.pressButton("Start", 15),
-    Subgoal.waitFrames(60),
-    Subgoal.pressButton("A", 15),
-    Subgoal.waitFrames(156),
-    Subgoal.pressButton("Start", 15),
-    Subgoal.waitFrames(109),
+    Subgoal.getOnBike(),
     {
-      name = "set Trainer ID",
+      name = "go up",
       targetState = {
-        {
-          register = 0xD358,
-          numBytes = 2,
-          bigEndianFlag = true,
-          expectedValue = {0x6411, 0x6413, 0x6415, 0x6416, 0x6417, 0x641A, 0x641B, 0x641D, 0x645A, 0x6471, 0x6476, 0x64CF, 0x64D0, 0x64EA}
-          --expectedValue = 30753
-        }
+        TargetState.yCoord(24),
+        TargetState.direction("Up")
       },
-      numFrames = 31 + 15,--fifteen frames of delay, plus the 31 frames for the inputs below
-      permittedInputs = {"A,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT,NO_INPUT,NO_INPUT," ..
-                         "NO_INPUT"}
-    }
+      numFrames = 1,
+      permittedInputs = {"Up"}
+    },
+    {
+      name = "go towards stairs",
+      targetState = {
+        TargetState.yCoord(23)
+      },
+      numFrames = 14,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go onto stairs",
+      targetState = {
+        TargetState.yCoord(22),
+      },
+      numFrames = 14,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
+    {
+      name = "go up stairs",
+      targetState = {
+        TargetState.yCoord(21),
+      },
+      numFrames = 14,
+      permittedInputs = {"NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Up", "NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,NO_INPUT,Right"}
+    },
   }
 }

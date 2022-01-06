@@ -24,7 +24,7 @@ function Subgoal.getOnBike()
       targetState = {
         TargetState.spriteIsOnBike()
       },
-      numFrames = 5,
+      numFrames = 10,
       permittedInputs = {"Select"}
     }
 end

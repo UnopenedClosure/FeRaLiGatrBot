@@ -77,10 +77,12 @@ function printTable(t, level)
   end
 end
 
-function displayTimeElapsed(startTime, dest)
+function displayTimeElapsed(startTime, earlierTime)
   currentTime = os.clock()
-  if dest == "branches.lua" then
+  if earlierTime ~= nil then
     log("-- " .. string.format("Elapsed time: %.2f seconds", (currentTime - startTime)))
+    local timeElapsed = earlierTime + currentTime - startTime
+    log("Branches.timeElapsed = " .. timeElapsed)
   else
     print(string.format("Elapsed time: %.2f seconds", (currentTime - startTime)))
   end
