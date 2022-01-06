@@ -5,8 +5,6 @@
 Route = {
   startFrame = 530,
   totalMaxFrames = 380,
---  totalMaxFrames = 9500, -- this is the total frames allowed for meeting all subgoals
---allow 255 frames for first movement inside PC
 
 -- Subgoals are achieved from first to last
   subgoals = {
@@ -24,11 +22,11 @@ Route = {
           register = 0xD358,
           numBytes = 2,
           bigEndianFlag = true,
-          expectedValue = {0x64CF, 0x64D0, 0x64EA}
+          expectedValue = {0x6411, 0x6413, 0x6415, 0x6416, 0x6417, 0x641A, 0x641B, 0x641D, 0x645A, 0x6471, 0x6476, 0x64CF, 0x64D0, 0x64EA}
           --expectedValue = 30753
         }
       },
-      numFrames = 31 + 15,
+      numFrames = 31 + 15,--fifteen frames of delay, plus the 31 frames for the inputs below
       permittedInputs = {"A,NO_INPUT,NO_INPUT," ..
                          "NO_INPUT,NO_INPUT,NO_INPUT," ..
                          "NO_INPUT,NO_INPUT,NO_INPUT," ..

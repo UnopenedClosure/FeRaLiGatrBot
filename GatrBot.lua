@@ -23,6 +23,7 @@ function runTest(inps, runToFrame, targetStates)
   end
   tastudio.applyinputchanges()
   advanceToFrame(runToFrame)
+  
   local stillValid = true
   local idx = 1
   local targetState = nil
@@ -48,6 +49,7 @@ function runTest(inps, runToFrame, targetStates)
 end
 
 tastudio.setrecording(false)
+--TODO there must be some way to save a branch?????
 tastudio.loadbranch(0)
 advanceToFrame(Route.startFrame)
 local currentFrame = emu.framecount()
@@ -136,7 +138,8 @@ for index, subgoal in pairs(subgoals) do
                   inputs = i
                 }
                 if runTest(i, newBranch["frame"], subgoal["targetState"]) then
-                --TODO pretty sure I need to set startFrame to f here
+                  --TODO pretty sure I need to set startFrame to f here
+                  newBranch["startFrame"] = newBranch["frame"]
                   table.insert(viableBranches, newBranch)
                   branchStatus = "branch viable"
                 else
@@ -144,12 +147,13 @@ for index, subgoal in pairs(subgoals) do
                   branchStatus = "branch not yet viable"
                 end
               else
+                --TODO can we remove the branch in this same pass instead of deferring it???
                 branchStatus = "branch about to be removed"
               end
             end
             print(prefix .. branchStatus .. ", " .. table.getn(viableBranches) .. " viable branches, " .. table.getn(possibleBranches) .. " possible branches")          
             passCount = passCount + 1
-            if passCount % 1000 == 0 then
+            if passCount % 500 == 0 then
               console.clear()
               displayTimeElapsed(startTime)
             end
@@ -249,6 +253,9 @@ for k, viableBranch in sortedBranches(viableBranches) do
   log("},", 1)
 end
 log("}")
+
+displayTimeElapsed(startTime, "branches.lua")
+
 io.close(log_file)
 
 client.pause()

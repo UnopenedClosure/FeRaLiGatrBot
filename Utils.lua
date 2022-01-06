@@ -77,9 +77,13 @@ function printTable(t, level)
   end
 end
 
-function displayTimeElapsed(startTime)
+function displayTimeElapsed(startTime, dest)
   currentTime = os.clock()
-  print(string.format("Elapsed time: %.2f seconds", (currentTime - startTime)))
+  if dest == "branches.lua" then
+    log("-- " .. string.format("Elapsed time: %.2f seconds", (currentTime - startTime)))
+  else
+    print(string.format("Elapsed time: %.2f seconds", (currentTime - startTime)))
+  end
 end
 
 function pairsByKeys (t, f)
