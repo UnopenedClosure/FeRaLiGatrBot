@@ -138,10 +138,10 @@ for index, subgoal in pairs(subgoals) do
                 if runTest(i, newBranch["frame"], subgoal["targetState"]) then
                 --TODO pretty sure I need to set startFrame to f here
                   table.insert(viableBranches, newBranch)
-                  branchStatus = "branch was viable"
+                  branchStatus = "branch viable"
                 else
                   table.insert(possibleBranches, newBranch)
-                  branchStatus = "branch was not yet viable"
+                  branchStatus = "branch not yet viable"
                 end
               else
                 branchStatus = "branch about to be removed"
