@@ -28,7 +28,6 @@ function runTest(inps, runToFrame, targetStates)
   local targetState = nil
   while stillValid and (idx <= table.getn(targetStates)) do
     targetState = targetStates[idx]
-    --TODO search for one of several expectedValues (e.g. manipping for one of a few trainer IDs)
     local expectedValue = targetState["expectedValue"]
     if type(expectedValue) == "table" then
       local actualValue = read(targetState["register"], targetState["numBytes"], targetState["bigEndianFlag"])
@@ -115,7 +114,7 @@ for index, subgoal in pairs(subgoals) do
           for k, inp in pairs(permittedInputs) do
           --TODO handle frames with more than one input (e.g. running)
             local prefix = "Subgoal " .. index .. " of " .. subgoalCount .. ", j.k = " .. j .. "." .. k .. ", "
-            local branchStatus = ""--TODO fix minor bug which sometimes keeps this blank
+            local branchStatus = ""
             local maxFrameForSubgoal = possibleBranches[j]["startFrame"] + subgoal["numFrames"]
             if maxFrameForSubgoal > maxFrame then
               maxFrameForSubgoal = maxFrame
@@ -146,6 +145,8 @@ for index, subgoal in pairs(subgoals) do
                   table.insert(possibleBranches, newBranch)
                   branchStatus = "branch was not yet viable"
                 end
+              else
+                branchStatus = "branch about to be removed"
               end
             end
             print(prefix .. branchStatus .. ", " .. table.getn(viableBranches) .. " viable branches, " .. table.getn(possibleBranches) .. " possible branches")          
@@ -214,7 +215,7 @@ function printBranchesToFile(t, level, inputsFlag)
   end
 end
 
-function branchesSortedByStartFrame(tab)
+function sortedBranches(tab)
    local keys = {}
    for k in pairs(tab) do
       keys[#keys + 1] = k
@@ -233,7 +234,7 @@ end
 
 -- list the surviving possibleBranches
 log("possibleBranches = {")
-for k, viableBranch in branchesSortedByStartFrame(viableBranches) do
+for k, viableBranch in sortedBranches(viableBranches) do
   log("{", 1)
   printBranchesToFile(viableBranch, 2)
   log("},", 1)
