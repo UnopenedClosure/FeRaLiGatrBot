@@ -47,14 +47,10 @@ function runTest(inps, runToFrame, targetStates)
   return stillValid
 end
 
-local subgoals = Route.subgoals
-local maxFrame = Route.startFrame + Route.totalMaxFrames
-
 tastudio.setrecording(false)
 tastudio.loadbranch(0)
 advanceToFrame(Route.startFrame)
 local currentFrame = emu.framecount()
-
 viableBranches = {} -- all branches that have successfully reached the targetStates by maxFrameForSubgoal
 possibleBranches = { -- all branches that have not yet failed to reach the targetStates by maxFrameForSubgoal
   {
@@ -66,6 +62,8 @@ possibleBranches = { -- all branches that have not yet failed to reach the targe
 
 local startTime = os.clock()
 local passCount = 0
+local subgoals = Route.subgoals
+local maxFrame = Route.startFrame + Route.totalMaxFrames
 local subgoalCount = table.getn(subgoals)
 log("subgoalCount = " .. subgoalCount)
 for index, subgoal in pairs(subgoals) do
