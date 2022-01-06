@@ -82,25 +82,52 @@ function displayTimeElapsed(startTime)
   print(string.format("Elapsed time: %.2f seconds", (currentTime - startTime)))
 end
 
+function pairsByKeys (t, f)
+  local a = {}
+  for n in pairs(t) do table.insert(a, n) end
+  table.sort(a, f)
+  local i = 0      -- iterator variable
+  local iter = function ()   -- iterator function
+    i = i + 1
+    if a[i] == nil then return nil
+    else return a[i], t[a[i]]
+    end
+  end
+  return iter
+end
+
 -------------
 -- BOTTING --
 -------------
 
-function read(addr, size)
-  mem = ""
-  memdomain = bit.rshift(addr, 24)
-  if memdomain == 0 then
-    mem = "BIOS"
-  elseif memdomain == 2 then
-    mem = "EWRAM"
-  elseif memdomain == 3 then
-    mem = "IWRAM"
-  elseif memdomain == 8 then
-    mem = "ROM"
+function read(addr, size, bigEndianFlag)
+  if addr <= 0xFFFF then
+    mem = nil
+  else
+    mem = ""
+    memdomain = bit.rshift(addr, 24)
+    if memdomain == 0 then
+      mem = "BIOS"
+    elseif memdomain == 2 then
+      mem = "EWRAM"
+    elseif memdomain == 3 then
+      mem = "IWRAM"
+    elseif memdomain == 8 then
+      mem = "ROM"
+    end
+    addr = bit.band(addr, 0xFFFFFF)
   end
-  addr = bit.band(addr, 0xFFFFFF)
+  bigEndianFlag = bigEndianFlag or false
   if size == 1 then
     return memory.read_u8(addr,mem)
+  elseif bigEndianFlag then
+    if size == 2 then
+      return memory.read_u16_be(addr,mem)
+    elseif size == 3 then
+      return memory.read_u24_be(addr,mem)
+    else
+      return memory.read_u32_be(addr,mem)
+    end
   elseif size == 2 then
     return memory.read_u16_le(addr,mem)
   elseif size == 3 then

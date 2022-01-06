@@ -8,6 +8,15 @@ function Subgoal.waitFrames(n)
     }
 end
 
+function Subgoal.pressButton(i, n)
+  return
+    {
+      name = "press " .. i,
+      numFrames = n,
+      inputs = i
+    }
+end
+
 function Subgoal.getOnBike()
   return
     {
