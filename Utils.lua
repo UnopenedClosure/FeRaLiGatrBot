@@ -163,7 +163,6 @@ function split(inputstr, sep)
   end
 end
 
---TODO is it faster to use tastudio.setmarker(targetFrame) ?
 function advanceToFrame(targetFrame)
   while emu.framecount() < targetFrame do
     emu.frameadvance()

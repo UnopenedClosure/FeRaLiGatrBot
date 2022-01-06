@@ -24,7 +24,8 @@ Route = {
           register = 0xD358,
           numBytes = 2,
           bigEndianFlag = true,
-          expectedValue = 30753
+          expectedValue = {30753, 41980}
+          --expectedValue = 30753
         }
       },
       numFrames = 35,

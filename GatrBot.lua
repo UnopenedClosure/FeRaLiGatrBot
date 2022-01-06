@@ -29,7 +29,20 @@ function runTest(inps, runToFrame, targetStates)
   while stillValid and (idx <= table.getn(targetStates)) do
     targetState = targetStates[idx]
     --TODO search for one of several expectedValues (e.g. manipping for one of a few trainer IDs)
-    stillValid = (read(targetState["register"], targetState["numBytes"], targetState["bigEndianFlag"]) == targetState["expectedValue"])    
+    local expectedValue = targetState["expectedValue"]
+    if type(expectedValue) == "table" then
+      local actualValue = read(targetState["register"], targetState["numBytes"], targetState["bigEndianFlag"])
+      local foundMatch = false
+      for n, ev in pairs(expectedValue) do
+        if actualValue == ev then
+          foundMatch = true
+          break
+        end
+      end
+      stillValid = foundMatch
+    else
+      stillValid = (read(targetState["register"], targetState["numBytes"], targetState["bigEndianFlag"]) == expectedValue)
+    end
     idx = idx + 1
   end
   return stillValid
