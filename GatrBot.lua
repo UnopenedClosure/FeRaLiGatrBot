@@ -175,9 +175,6 @@ for index, subgoal in pairs(subgoals) do
 end
 displayTimeElapsed(startTime)
 
---TODO sort branches by fewest inputs????
---TODO unfinished work - fix generated lua file's input keys (I think this is done, but I haven't tested it yet)
-
 function printBranchesToFile(t, level, inputsFlag)
   level = level or 0
   inputsFlag = inputsFlag or false
@@ -213,21 +210,35 @@ function printBranchesToFile(t, level, inputsFlag)
   end
 end
 
+function countInputs(tab)
+  local toReturn = 0
+  for u, v in pairs(tab) do
+    if v ~= "NO_INPUT" then
+      toReturn = toReturn + 1
+    end
+  end
+end
+
 function sortedBranches(tab)
    local keys = {}
    for k in pairs(tab) do
       keys[#keys + 1] = k
    end
-   table.sort(keys, function(a, b) return tab[a]["startFrame"] < tab[b]["startFrame"] end)
+   table.sort(keys, function(a, b)
+                      if tab[a]["startFrame"] == tab[b]["startFrame"] then
+                        return countInputs(tab[a]) < countInputs(tab[b])
+                      else
+                        return tab[a]["startFrame"] < tab[b]["startFrame"]
+                      end
+                    end)
    local j = 0
-   return
-      function()
-         j = j + 1
-         local k = keys[j]
-         if k ~= nil then
-            return k, tab[k]
-         end
-      end
+   return function()
+            j = j + 1
+            local k = keys[j]
+            if k ~= nil then
+              return k, tab[k]
+            end
+          end
 end
 
 -- list the surviving possibleBranches
