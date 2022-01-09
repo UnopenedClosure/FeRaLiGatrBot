@@ -2,8 +2,14 @@ dofile ("Utils.lua")
 dofile ("Data.lua")
 dofile ("TargetState.lua")
 dofile ("Subgoal.lua")
-dofile ("Route.lua")
 
+--routefile and WIPfile go here
+dofile ("Route.lua")
+--dofile ("Route - testing failure conditions.lua")
+local branchesWIPFile = "log/branches_20220106192441.lua"
+--local branchesWIPFile = nil
+
+--TODO migrate more logging setup inside of Utils.java
 if not isdir("log") then
   os.execute("mkdir log")
 end
@@ -11,10 +17,29 @@ local log_file = io.open(os.date("log/branches_%Y%m%d%H%M%S.lua"), "a")
 io.output(log_file)
 local loglevel="DEBUG"
 
-local branchesWIPFile = "log/branches_20220106104807.lua"
---local branchesWIPFile = nil
-
---TODO add dead-end indication logic?????
+function checkStates(states)
+  local stillValid = true
+  local idx = 1
+  while stillValid and (idx <= table.getn(states)) do
+    local targetState = states[idx]
+    local actualValue = read(targetState["register"], targetState["numBytes"], targetState["bigEndianFlag"])
+    local expectedValue = targetState["expectedValue"]
+    if type(expectedValue) == "table" then
+      local foundMatch = false
+      for n, ev in pairs(expectedValue) do
+        if actualValue == ev then
+          foundMatch = true
+          break
+        end
+      end
+      stillValid = foundMatch
+    else
+      stillValid = (actualValue == expectedValue)
+    end
+    idx = idx + 1
+  end
+  return stillValid
+end
 
 function runTest(inps, runToFrame, targetStates)
   tastudio.loadbranch(0)
@@ -25,34 +50,13 @@ function runTest(inps, runToFrame, targetStates)
   end
   tastudio.applyinputchanges()
   advanceToFrame(runToFrame)
-  
-  local stillValid = true
-  local idx = 1
-  local targetState = nil
-  while stillValid and (idx <= table.getn(targetStates)) do
-    targetState = targetStates[idx]
-    local expectedValue = targetState["expectedValue"]
-    if type(expectedValue) == "table" then
-      local actualValue = read(targetState["register"], targetState["numBytes"], targetState["bigEndianFlag"])
-      local foundMatch = false
-      for n, ev in pairs(expectedValue) do
-        if actualValue == ev then
-          foundMatch = true
-          break
-        end
-      end
-      stillValid = foundMatch
-    else
-      stillValid = (read(targetState["register"], targetState["numBytes"], targetState["bigEndianFlag"]) == expectedValue)
-    end
-    idx = idx + 1
-  end
-  return stillValid
+  return checkStates(targetStates)
 end
 
+--TODO move the setup ahead of the functions????
 tastudio.setrecording(false)
 client.invisibleemulation(false)
---TODO there must be some way to save a branch?????
+--TODO once this issue gets addressed (https://github.com/TASEmulators/BizHawk/issues/1161), save a branch to use for botting instead of branch 0
 tastudio.loadbranch(0)
 advanceToFrame(Route.startFrame)
 local currentFrame = emu.framecount()
@@ -63,7 +67,7 @@ successfulBranches = {} -- all branches that have successfully reached the targe
 if branchesWIPFile ~= nil then
   dofile(branchesWIPFile)
   firstSubgoal = Branches.subgoalCount + 1
-  candidateBranches = Branches.candidateBranches
+  candidateBranches = Branches.successfulBranches
   timeElapsed = Branches.timeElapsed
   local mess = "loaded " .. table.getn(candidateBranches) .. " branches from " .. branchesWIPFile
   print(mess)
@@ -78,10 +82,10 @@ else
   }
 end
 
-local startTime = os.clock()
+local startTime = os.clock()--TODO migrate this inside of Utils???
 local passCount = 0
-local subgoals = Route.subgoals
 local maxFrame = Route.startFrame + Route.totalMaxFrames
+local subgoals = Route.subgoals
 local subgoalCount = table.getn(subgoals)
 log("Branches = {}")
 log("Branches.subgoalCount = " .. subgoalCount)
@@ -90,18 +94,15 @@ for index, subgoal in pairs(subgoals) do
     print("Subgoal " .. index .. " of " .. subgoalCount .. " already finished, moving on...")
   else
     if string.find(subgoal["name"], "wait ") then
-      local waitFrames = string.find(subgoal["name"], " frames")
-      if waitFrames ~= null then
-        local numF = string.sub(subgoal["name"], 6, (waitFrames - 1))
-        for i, branch in pairs(candidateBranches) do
-          local startF = branch["startFrame"]
-          for m=1, tonumber(numF), 1 do
-            branch["inputs"][startF + m - 1] = "NO_INPUT"
-          end
-          branch["startFrame"] = startF + numF
-          branch["frame"] = branch["frame"] + numF
-          table.insert(successfulBranches, branch)
+      local numF = subgoal["numFrames"]
+      for n, branch in pairs(candidateBranches) do
+        local startF = branch["startFrame"]
+        for m = 1, tonumber(numF), 1 do
+          branch["inputs"][startF + m - 1] = "NO_INPUT"
         end
+        branch["startFrame"] = startF + numF
+        branch["frame"] = branch["frame"] + numF
+        table.insert(successfulBranches, branch)
       end
     else
       if string.find(subgoal["name"], "press ") then
@@ -157,12 +158,24 @@ for index, subgoal in pairs(subgoals) do
                     inputs = i
                   }
                   if runTest(i, newBranch["frame"], subgoal["targetState"]) then
-                    newBranch["startFrame"] = newBranch["frame"]--TODO is this redundant with the call on line 191????
+                    if subgoal["failureState"] ~= nil then
+                      if checkStates(subgoal["failureState"]) then
+                        branchStatus = "branch failed"
+                        break
+                      end
+                    end                     
+                    newBranch["startFrame"] = newBranch["frame"]
                     table.insert(successfulBranches, newBranch)
                     branchStatus = "branch successful"
                   else
-                    table.insert(candidateBranches, newBranch)
                     branchStatus = "branch not yet successful"
+                    if subgoal["failureState"] ~= nil then
+                      if checkStates(subgoal["failureState"]) then
+                        branchStatus = "branch failed"
+                      end
+                    else
+                      table.insert(candidateBranches, newBranch)
+                    end
                   end
                 end
               end
@@ -183,8 +196,8 @@ for index, subgoal in pairs(subgoals) do
         end
       end
     end  
-    --TODO performance improvement? - maintain two pointers and swap them, instead of deep-copying the tables  
-    
+    --TODO write the branches.lua after each subgoal instead of at the very end
+    --TODO performance improvement? - maintain two pointers and swap them, instead of deep-copying the tables
     if index ~= table.getn(subgoals) then
       candidateBranches = deepcopy(successfulBranches)
       for i, branch in pairs(candidateBranches) do
@@ -198,24 +211,18 @@ for index, subgoal in pairs(subgoals) do
 end
 displayTimeElapsed(startTime)
 
+--TODO group all of the functions together???
 function printBranchesToFile(t, level, inputsFlag)
   level = level or 0
   inputsFlag = inputsFlag or false
   if inputsFlag then
     for key, value in pairsByKeys(t) do
-      toPrint = ""
-      for i = 1, level,1 do
-        toPrint = toPrint .. '\t'
-      end
-      toPrint = toPrint .. '[' .. key .. '] = "' .. tostring(value) .. '",'
+      toPrint = string.rep("\t", level) .. '[' .. key .. '] = "' .. tostring(value) .. '",'
       log(toPrint)
     end
   else
     for key, value in pairs(t) do
-      toPrint = ""
-      for i = 1, level,1 do
-        toPrint = toPrint .. '\t'
-      end
+      toPrint = string.rep("\t", level)
       if inputsFlag then
         toPrint = toPrint .. '[' .. key .. '] = "'
       else
@@ -234,7 +241,6 @@ function printBranchesToFile(t, level, inputsFlag)
 end
 
 function countInputs(tab)
-  print(tab)
   local toReturn = 0
   for u, v in pairs(tab) do
     if v ~= "NO_INPUT" then
@@ -266,9 +272,9 @@ function sortedBranches(tab)
           end
 end
 
--- list the surviving successfulBranches
-log("Branches.candidateBranches = {") -- they are written as candidateBranches to make it easier to continue the search with the generated file
-for k, viableBranch in sortedBranches(successfulBranches) do--sortedBranches(successfulBranches) do
+-- persist successfulBranches for future searching
+log("Branches.successfulBranches = {")
+for k, viableBranch in sortedBranches(successfulBranches) do
   log("{", 1)
   printBranchesToFile(viableBranch, 2)
   log("},", 1)
@@ -276,5 +282,5 @@ end
 log("}")
 
 displayTimeElapsed(startTime, timeElapsed)
-io.close(log_file)
+io.close(log_file)--TODO can I set this up to execute when the script ends? or will it execute when the script ends anyway?
 client.pause()

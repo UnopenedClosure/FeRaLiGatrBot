@@ -89,163 +89,170 @@ function Data.findMapValue(name)
   return null
 end
 
-Direction = {}
-Direction["Down"] = 0x11
-Direction["Up"] = 0x22
-Direction["Left"] = 0x33
-Direction["Right"] = 0x44
+Direction = {
+  ["Down"] = 0x11,
+  ["Up"] = 0x22,
+  ["Left"] = 0x33,
+  ["Right"] = 0x44
+}
 
-CharMapping = {}
-CharMapping[" "] = 0x00
-CharMapping["ß"] = 0x15
-CharMapping["é"] = 0x1B
-CharMapping["0"] = 0xA1
-CharMapping["1"] = 0xA2
-CharMapping["2"] = 0xA3
-CharMapping["3"] = 0xA4
-CharMapping["4"] = 0xA5
-CharMapping["5"] = 0xA6
-CharMapping["6"] = 0xA7
-CharMapping["7"] = 0xA8
-CharMapping["8"] = 0xA9
-CharMapping["9"] = 0xAA
-CharMapping["!"] = 0xAB
-CharMapping["-"] = 0xAE
-CharMapping["..."] = 0xAF
-CharMapping[".."] = 0xB0
-CharMapping["«"] = 0xB1
-CharMapping["»"] = 0xB2
-CharMapping["<"] = 0xB3
-CharMapping["|m|"] = 0xB5
-CharMapping["|w|"] = 0xB6
-CharMapping[","] = 0xB8
-CharMapping["*"] = 0xB9
-CharMapping["/"] = 0xBA
-CharMapping["A"] = 0xBB
-CharMapping["B"] = 0xBC
-CharMapping["C"] = 0xBD
-CharMapping["D"] = 0xBE
-CharMapping["E"] = 0xBF
-CharMapping["F"] = 0xC0
-CharMapping["G"] = 0xC1
-CharMapping["H"] = 0xC2
-CharMapping["I"] = 0xC3
-CharMapping["J"] = 0xC4
-CharMapping["K"] = 0xC5
-CharMapping["L"] = 0xC6
-CharMapping["M"] = 0xC7
-CharMapping["N"] = 0xC8
-CharMapping["O"] = 0xC9
-CharMapping["P"] = 0xCA
-CharMapping["Q"] = 0xCB
-CharMapping["R"] = 0xCC
-CharMapping["S"] = 0xCD
-CharMapping["T"] = 0xCE
-CharMapping["U"] = 0xCF
-CharMapping["V"] = 0xD0
-CharMapping["W"] = 0xD1
-CharMapping["X"] = 0xD2
-CharMapping["Y"] = 0xD3
-CharMapping["Z"] = 0xD4
-CharMapping["a"] = 0xD5
-CharMapping["b"] = 0xD6
-CharMapping["c"] = 0xD7
-CharMapping["d"] = 0xD8
-CharMapping["e"] = 0xD9
-CharMapping["f"] = 0xDA
-CharMapping["g"] = 0xDB
-CharMapping["h"] = 0xDC
-CharMapping["i"] = 0xDD
-CharMapping["j"] = 0xDE
-CharMapping["k"] = 0xDF
-CharMapping["l"] = 0xE0
-CharMapping["m"] = 0xE1
-CharMapping["n"] = 0xE2
-CharMapping["o"] = 0xE3
-CharMapping["p"] = 0xE4
-CharMapping["q"] = 0xE5
-CharMapping["r"] = 0xE6
-CharMapping["s"] = 0xE7
-CharMapping["t"] = 0xE8
-CharMapping["u"] = 0xE9
-CharMapping["v"] = 0xEA
-CharMapping["w"] = 0xEB
-CharMapping["x"] = 0xEC
-CharMapping["y"] = 0xED
-CharMapping["z"] = 0xEE
-CharMapping["|>|"] = 0xEF
-CharMapping[":"] = 0xF0
-CharMapping["Ä"] = 0xF1
-CharMapping["Ö"] = 0xF2
-CharMapping["Ü"] = 0xF3
+CharMapping = {
+  [" "] = 0x00,
+  ["ß"] = 0x15,
+  ["é"] = 0x1B,
+  ["0"] = 0xA1,
+  ["1"] = 0xA2,
+  ["2"] = 0xA3,
+  ["3"] = 0xA4,
+  ["4"] = 0xA5,
+  ["5"] = 0xA6,
+  ["6"] = 0xA7,
+  ["7"] = 0xA8,
+  ["8"] = 0xA9,
+  ["9"] = 0xAA,
+  ["!"] = 0xAB,
+  ["-"] = 0xAE,
+  ["..."] = 0xAF,
+  [".."] = 0xB0,
+  ["«"] = 0xB1,
+  ["»"] = 0xB2,
+  ["<"] = 0xB3,
+  ["|m|"] = 0xB5,
+  ["|w|"] = 0xB6,
+  [","] = 0xB8,
+  ["*"] = 0xB9,
+  ["/"] = 0xBA,
+  ["A"] = 0xBB,
+  ["B"] = 0xBC,
+  ["C"] = 0xBD,
+  ["D"] = 0xBE,
+  ["E"] = 0xBF,
+  ["F"] = 0xC0,
+  ["G"] = 0xC1,
+  ["H"] = 0xC2,
+  ["I"] = 0xC3,
+  ["J"] = 0xC4,
+  ["K"] = 0xC5,
+  ["L"] = 0xC6,
+  ["M"] = 0xC7,
+  ["N"] = 0xC8,
+  ["O"] = 0xC9,
+  ["P"] = 0xCA,
+  ["Q"] = 0xCB,
+  ["R"] = 0xCC,
+  ["S"] = 0xCD,
+  ["T"] = 0xCE,
+  ["U"] = 0xCF,
+  ["V"] = 0xD0,
+  ["W"] = 0xD1,
+  ["X"] = 0xD2,
+  ["Y"] = 0xD3,
+  ["Z"] = 0xD4,
+  ["a"] = 0xD5,
+  ["b"] = 0xD6,
+  ["c"] = 0xD7,
+  ["d"] = 0xD8,
+  ["e"] = 0xD9,
+  ["f"] = 0xDA,
+  ["g"] = 0xDB,
+  ["h"] = 0xDC,
+  ["i"] = 0xDD,
+  ["j"] = 0xDE,
+  ["k"] = 0xDF,
+  ["l"] = 0xE0,
+  ["m"] = 0xE1,
+  ["n"] = 0xE2,
+  ["o"] = 0xE3,
+  ["p"] = 0xE4,
+  ["q"] = 0xE5,
+  ["r"] = 0xE6,
+  ["s"] = 0xE7,
+  ["t"] = 0xE8,
+  ["u"] = 0xE9,
+  ["v"] = 0xEA,
+  ["w"] = 0xEB,
+  ["x"] = 0xEC,
+  ["y"] = 0xED,
+  ["z"] = 0xEE,
+  ["|>|"] = 0xEF,
+  [":"] = 0xF0,
+  ["Ä"] = 0xF1,
+  ["Ö"] = 0xF2,
+  ["Ü"] = 0xF3
+}
 
 PokemonSpecies = {
-  "Bulbasaur", "Ivysaur", "Venusaur", "Charmander", "Charmeleon", "Charizard",
-  "Squirtle", "Wartortle", "Blastoise", "Caterpie", "Metapod", "Butterfree",
-  "Weedle", "Kakuna", "Beedrill", "Pidgey", "Pidgeotto", "Pidgeot", "Rattata", "Raticate",
-  "Spearow", "Fearow", "Ekans", "Arbok", "Pikachu", "Raichu", "Sandshrew", "Sandslash",
-  "Nidoran F", "Nidorina", "Nidoqueen", "Nidoran M", "Nidorino", "Nidoking",
-  "Clefairy", "Clefable", "Vulpix", "Ninetales", "Jigglypuff", "Wigglytuff",
-  "Zubat", "Golbat", "Oddish", "Gloom", "Vileplume", "Paras", "Parasect", "Venonat", "Venomoth",
-  "Diglett", "Dugtrio", "Meowth", "Persian", "Psyduck", "Golduck", "Mankey", "Primeape",
-  "Growlithe", "Arcanine", "Poliwag", "Poliwhirl", "Poliwrath", "Abra", "Kadabra", "Alakazam",
-  "Machop", "Machoke", "Machamp", "Bellsprout", "Weepinbell", "Victreebel", "Tentacool", "Tentacruel",
-  "Geodude", "Graveler", "Golem", "Ponyta", "Rapidash", "Slowpoke", "Slowbro",
-  "Magnemite", "Magneton", "Farfetch'd", "Doduo", "Dodrio", "Seel", "Dewgong", "Grimer", "Muk",
-  "Shellder", "Cloyster", "Gastly", "Haunter", "Gengar", "Onix", "Drowzee", "Hypno",
-  "Krabby", "Kingler", "Voltorb", "Electrode", "Exeggcute", "Exeggutor", "Cubone", "Marowak",
-  "Hitmonlee", "Hitmonchan", "Lickitung", "Koffing", "Weezing", "Rhyhorn", "Rhydon", "Chansey",
-  "Tangela", "Kangaskhan", "Horsea", "Seadra", "Goldeen", "Seaking", "Staryu", "Starmie",
-  "Mr. Mime", "Scyther", "Jynx", "Electabuzz", "Magmar", "Pinsir", "Tauros", "Magikarp", "Gyarados",
-  "Lapras", "Ditto", "Eevee", "Vaporeon", "Jolteon", "Flareon", "Porygon", "Omanyte", "Omastar",
-  "Kabuto", "Kabutops", "Aerodactyl", "Snorlax", "Articuno", "Zapdos", "Moltres",
-  "Dratini", "Dragonair", "Dragonite", "Mewtwo", "Mew",
-
-  "Chikorita", "Bayleef", "Meganium", "Cyndaquil", "Quilava", "Typhlosion",
-  "Totodile", "Croconaw", "Feraligatr", "Sentret", "Furret", "Hoothoot", "Noctowl",
-  "Ledyba", "Ledian", "Spinarak", "Ariados", "Crobat", "Chinchou", "Lanturn", "Pichu", "Cleffa",
-  "Igglybuff", "Togepi", "Togetic", "Natu", "Xatu", "Mareep", "Flaaffy", "Ampharos", "Bellossom",
-  "Marill", "Azumarill", "Sudowoodo", "Politoed", "Hoppip", "Skiploom", "Jumpluff", "Aipom",
-  "Sunkern", "Sunflora", "Yanma", "Wooper", "Quagsire", "Espeon", "Umbreon", "Murkrow", "Slowking",
-  "Misdreavus", "Unown", "Wobbuffet", "Girafarig", "Pineco", "Forretress", "Dunsparce", "Gligar",
-  "Steelix", "Snubbull", "Granbull", "Qwilfish", "Scizor", "Shuckle", "Heracross", "Sneasel",
-  "Teddiursa", "Ursaring", "Slugma", "Magcargo", "Swinub", "Piloswine", "Corsola", "Remoraid", "Octillery",
-  "Delibird", "Mantine", "Skarmory", "Houndour", "Houndoom", "Kingdra", "Phanpy", "Donphan",
-  "Porygon2", "Stantler", "Smeargle", "Tyrogue", "Hitmontop", "Smoochum", "Elekid", "Magby", "Miltank",
-  "Blissey", "Raikou", "Entei", "Suicune", "Larvitar", "Pupitar", "Tyranitar", "Lugia", "Ho-Oh", "Celebi",
-  
-  "none","none","none","none","none",
-  "none","none","none","none","none",
-  "none","none","none","none","none",
-  "none","none","none","none","none",
-  "none","none","none","none","none",
-  
-  "Treecko", "Grovyle", "Sceptile",
-  "Torchic", "Combusken", "Blaziken",
-  "Mudkip", "Marshtomp", "Swampert",
-  "Poochyena", "Mightyena", "Zigzagoon", "Linoone",
-  "Wurmple", "Silcoon", "Beautifly", "Cascoon", "Dustox",
-  "Lotad", "Lombre", "Ludicolo", "Seedot", "Nuzleaf", "Shiftry",    
-  "Nincada", "Ninjask", "Shedinja", "Taillow", "Swellow",
-  "Shroomish", "Breloom", "Spinda", "Wingull", "Pelipper",
-  "Surskit", "Masquerain", "Wailmer", "Wailord", "Skitty", "Delcatty",
-  "Kecleon", "Baltoy", "Claydol", "Nosepass", "Torkoal", "Sableye",
-  "Barboach", "Whiscash", "Luvdisc", "Corphish", "Crawdaunt", "Feebas", "Milotic",  
-  "Carvanha", "Sharpedo", "Trapinch", "Vibrava", "Flygon", "Makuhita", "Hariyama",
-  "Electrike", "Manectric", "Numel", "Camerupt", "Spheal", "Sealeo", "Walrein", "Cacnea", "Cacturne",
-  "Snorunt", "Glalie", "Lunatone", "Solrock", "Azurill", "Spoink", "Grumpig", "Plusle", "Minun",
-  "Mawile", "Meditite", "Medicham", "Swablu", "Altaria", "Wynaut", "Duskull", "Dusclops", "Roselia",
-  "Slakoth", "Vigoroth", "Slaking", "Gulpin", "Swalot", "Tropius", "Whismur", "Loudred", "Exploud",
-  "Clamperl", "Huntail", "Gorebyss", "Absol", "Shuppet", "Banette", "Seviper", "Zangoose", "Relicanth",
-  "Aron", "Lairon", "Aggron", "Castform", "Volbeat", "Illumise", "Lileep", "Cradily",
-  "Anorith", "Armaldo", "Ralts", "Kirlia", "Gardevoir", "Bagon", "Shelgon", "Salamence", "Beldum",
-  "Metang", "Metagross", "Regirock", "Regice", "Registeel", "Kyogre", "Groudon", "Rayquaza",
-  "Latias", "Latios", "Jirachi", "Deoxys", "Chimecho",
-  
-  "Unown","Unown","Unown","Unown","Unown",
-  "Unown","Unown","Unown","Unown","Unown",
-  "Unown","Unown","Unown","Unown","Unown",
-  "Unown","Unown","Unown","Unown","Unown",
-  "Unown","Unown","Unown","Unown","Unown",
-  "Unown","Unown"
+  "Bulbasaur", "Ivysaur", "Venusaur", "Charmander", "Charmeleon", "Charizard", 
+  "Squirtle", "Wartortle", "Blastoise", "Caterpie", "Metapod", "Butterfree", 
+  "Weedle", "Kakuna", "Beedrill", "Pidgey", "Pidgeotto", "Pidgeot", 
+  "Rattata", "Raticate", "Spearow", "Fearow", "Ekans", "Arbok", 
+  "Pikachu", "Raichu", "Sandshrew", "Sandslash", "Nidoran F", "Nidorina", 
+  "Nidoqueen", "Nidoran M", "Nidorino", "Nidoking", "Clefairy", "Clefable", 
+  "Vulpix", "Ninetales", "Jigglypuff", "Wigglytuff", "Zubat", "Golbat", 
+  "Oddish", "Gloom", "Vileplume", "Paras", "Parasect", "Venonat", 
+  "Venomoth", "Diglett", "Dugtrio", "Meowth", "Persian", "Psyduck", 
+  "Golduck", "Mankey", "Primeape", "Growlithe", "Arcanine", "Poliwag", 
+  "Poliwhirl", "Poliwrath", "Abra", "Kadabra", "Alakazam", "Machop", 
+  "Machoke", "Machamp", "Bellsprout", "Weepinbell", "Victreebel", "Tentacool", 
+  "Tentacruel", "Geodude", "Graveler", "Golem", "Ponyta", "Rapidash", 
+  "Slowpoke", "Slowbro", "Magnemite", "Magneton", "Farfetch'd", "Doduo", 
+  "Dodrio", "Seel", "Dewgong", "Grimer", "Muk", "Shellder", 
+  "Cloyster", "Gastly", "Haunter", "Gengar", "Onix", "Drowzee", 
+  "Hypno", "Krabby", "Kingler", "Voltorb", "Electrode", "Exeggcute", 
+  "Exeggutor", "Cubone", "Marowak", "Hitmonlee", "Hitmonchan", "Lickitung", 
+  "Koffing", "Weezing", "Rhyhorn", "Rhydon", "Chansey", "Tangela", 
+  "Kangaskhan", "Horsea", "Seadra", "Goldeen", "Seaking", "Staryu", 
+  "Starmie", "Mr. Mime", "Scyther", "Jynx", "Electabuzz", "Magmar", 
+  "Pinsir", "Tauros", "Magikarp", "Gyarados", "Lapras", "Ditto", 
+  "Eevee", "Vaporeon", "Jolteon", "Flareon", "Porygon", "Omanyte", 
+  "Omastar", "Kabuto", "Kabutops", "Aerodactyl", "Snorlax", "Articuno", 
+  "Zapdos", "Moltres", "Dratini", "Dragonair", "Dragonite", "Mewtwo", 
+  "Mew", "Chikorita", "Bayleef", "Meganium", "Cyndaquil", "Quilava", 
+  "Typhlosion", "Totodile", "Croconaw", "Feraligatr", "Sentret", "Furret", 
+  "Hoothoot", "Noctowl", "Ledyba", "Ledian", "Spinarak", "Ariados", 
+  "Crobat", "Chinchou", "Lanturn", "Pichu", "Cleffa", "Igglybuff", 
+  "Togepi", "Togetic", "Natu", "Xatu", "Mareep", "Flaaffy", 
+  "Ampharos", "Bellossom", "Marill", "Azumarill", "Sudowoodo", "Politoed", 
+  "Hoppip", "Skiploom", "Jumpluff", "Aipom", "Sunkern", "Sunflora", 
+  "Yanma", "Wooper", "Quagsire", "Espeon", "Umbreon", "Murkrow", 
+  "Slowking", "Misdreavus", "Unown", "Wobbuffet", "Girafarig", "Pineco", 
+  "Forretress", "Dunsparce", "Gligar", "Steelix", "Snubbull", "Granbull", 
+  "Qwilfish", "Scizor", "Shuckle", "Heracross", "Sneasel", "Teddiursa", 
+  "Ursaring", "Slugma", "Magcargo", "Swinub", "Piloswine", "Corsola", 
+  "Remoraid", "Octillery", "Delibird", "Mantine", "Skarmory", "Houndour", 
+  "Houndoom", "Kingdra", "Phanpy", "Donphan", "Porygon2", "Stantler", 
+  "Smeargle", "Tyrogue", "Hitmontop", "Smoochum", "Elekid", "Magby", 
+  "Miltank", "Blissey", "Raikou", "Entei", "Suicune", "Larvitar", 
+  "Pupitar", "Tyranitar", "Lugia", "Ho-Oh", "Celebi", "none", 
+  "none", "none", "none", "none", "none", "none", 
+  "none", "none", "none", "none", "none", "none", 
+  "none", "none", "none", "none", "none", "none", 
+  "none", "none", "none", "none", "none", "none", 
+  "Treecko", "Grovyle", "Sceptile", "Torchic", "Combusken", "Blaziken", 
+  "Mudkip", "Marshtomp", "Swampert", "Poochyena", "Mightyena", "Zigzagoon", 
+  "Linoone", "Wurmple", "Silcoon", "Beautifly", "Cascoon", "Dustox", 
+  "Lotad", "Lombre", "Ludicolo", "Seedot", "Nuzleaf", "Shiftry", 
+  "Nincada", "Ninjask", "Shedinja", "Taillow", "Swellow", "Shroomish", 
+  "Breloom", "Spinda", "Wingull", "Pelipper", "Surskit", "Masquerain", 
+  "Wailmer", "Wailord", "Skitty", "Delcatty", "Kecleon", "Baltoy", 
+  "Claydol", "Nosepass", "Torkoal", "Sableye", "Barboach", "Whiscash", 
+  "Luvdisc", "Corphish", "Crawdaunt", "Feebas", "Milotic", "Carvanha", 
+  "Sharpedo", "Trapinch", "Vibrava", "Flygon", "Makuhita", "Hariyama", 
+  "Electrike", "Manectric", "Numel", "Camerupt", "Spheal", "Sealeo", 
+  "Walrein", "Cacnea", "Cacturne", "Snorunt", "Glalie", "Lunatone", 
+  "Solrock", "Azurill", "Spoink", "Grumpig", "Plusle", "Minun", 
+  "Mawile", "Meditite", "Medicham", "Swablu", "Altaria", "Wynaut", 
+  "Duskull", "Dusclops", "Roselia", "Slakoth", "Vigoroth", "Slaking", 
+  "Gulpin", "Swalot", "Tropius", "Whismur", "Loudred", "Exploud", 
+  "Clamperl", "Huntail", "Gorebyss", "Absol", "Shuppet", "Banette", 
+  "Seviper", "Zangoose", "Relicanth", "Aron", "Lairon", "Aggron", 
+  "Castform", "Volbeat", "Illumise", "Lileep", "Cradily", "Anorith", 
+  "Armaldo", "Ralts", "Kirlia", "Gardevoir", "Bagon", "Shelgon", 
+  "Salamence", "Beldum", "Metang", "Metagross", "Regirock", "Regice", 
+  "Registeel", "Kyogre", "Groudon", "Rayquaza", "Latias", "Latios", 
+  "Jirachi", "Deoxys", "Chimecho", "Unown", "Unown", "Unown", 
+  "Unown", "Unown", "Unown", "Unown", "Unown", "Unown", 
+  "Unown", "Unown", "Unown", "Unown", "Unown", "Unown", 
+  "Unown", "Unown", "Unown", "Unown", "Unown", "Unown", 
+  "Unown", "Unown", "Unown", "Unown", "Unown", "Unown"
 }

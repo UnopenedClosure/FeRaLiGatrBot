@@ -18,12 +18,7 @@ end
 
 function log(txt, level)
   level = level or 0
-  toPrint = ""
-  for i = 1, level,1 do
-    toPrint = toPrint .. '\t'
-  end
-  io.write(toPrint .. tostring(txt))
-  io.write("\n")
+  io.write(string.rep("\t", level) .. tostring(txt) .. "\n")
 end
 
 function debug(txt, level)
@@ -36,11 +31,7 @@ end
 function logTable(t, level)
   level = level or 0
   for key, value in pairs(t) do
-    toPrint = ""
-    for i = 1, level,1 do
-      toPrint = toPrint .. '\t'
-    end
-    toPrint = toPrint .. key .. " = "
+    toPrint = string.rep("\t", level) .. key .. " = "
     if type(value) == "table" then
       log(toPrint .. "{")
       logTable(value, level + 1)
@@ -62,11 +53,7 @@ end
 function printTable(t, level)
   level = level or 0
   for key, value in pairs(t) do
-    toPrint = ""
-    for i = 1, level,1 do
-      toPrint = toPrint .. '\t'
-    end
-    toPrint = toPrint .. key .. ":"
+    toPrint = string.rep("\t", level) .. key .. ":"
     if type(value) == "table" then
       print(toPrint)
       printTable(value, level + 1)
