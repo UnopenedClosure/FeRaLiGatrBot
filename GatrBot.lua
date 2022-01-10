@@ -4,10 +4,16 @@ dofile ("TargetState.lua")
 dofile ("Subgoal.lua")
 
 --routefile and WIPfile go here
-dofile ("Route.lua")
+dofile ("Route - Five Isle Meadow.lua")
+--dofile ("Route.lua")
 --dofile ("Route - testing failure conditions.lua")
-local branchesWIPFile = "log/branches_20220106192441.lua"
+--local branchesWIPFile = "log/branches_20220106192441.lua"
 --local branchesWIPFile = nil
+local branchesWIPFile = "log/branches_20220110133244.lua"
+branchNum = 13
+if not branchNum then
+  branchNum = 0
+end
 
 --TODO migrate more logging setup inside of Utils.java
 if not isdir("log") then
@@ -16,6 +22,7 @@ end
 local log_file = io.open(os.date("log/branches_%Y%m%d%H%M%S.lua"), "a")
 io.output(log_file)
 local loglevel="DEBUG"
+local logfrequency = 1
 
 function checkStates(states)
   local stillValid = true
@@ -42,7 +49,7 @@ function checkStates(states)
 end
 
 function runTest(inps, runToFrame, targetStates)
-  tastudio.loadbranch(0)
+  tastudio.loadbranch(branchNum)
   for g, a in pairs(inps) do
     if a ~= "NO_INPUT" then
       tastudio.submitinputchange(g, a, true)
@@ -57,7 +64,7 @@ end
 tastudio.setrecording(false)
 client.invisibleemulation(false)
 --TODO once this issue gets addressed (https://github.com/TASEmulators/BizHawk/issues/1161), save a branch to use for botting instead of branch 0
-tastudio.loadbranch(0)
+tastudio.loadbranch(branchNum)
 advanceToFrame(Route.startFrame)
 local currentFrame = emu.framecount()
 local firstSubgoal = 1
@@ -179,7 +186,7 @@ for index, subgoal in pairs(subgoals) do
                   end
                 end
               end
-              if branchCount % 10 == 0 and branchStatus ~= "" then
+              if branchCount % logfrequency == 0 and branchStatus ~= "" then
                 print(prefix .. branchStatus .. ", " .. table.getn(successfulBranches) .. " successful branches, " .. table.getn(candidateBranches) .. " candidate branches")          
               end
               passCount = passCount + 1
