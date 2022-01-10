@@ -22,7 +22,7 @@ function log(txt, level)
 end
 
 function debug(txt, level)
-  level = level or 0
+  level = level or 0--TODO is this necessary???
   if loglevel=="DEBUG" then
     log(txt, level)
   end
@@ -45,7 +45,7 @@ end
 
 function debugTable(t, level)
   if loglevel=="DEBUG" then
-    level = level or 0
+    level = level or 0--TODO is this necessary???
     logTable(t, level)
   end
 end
@@ -77,15 +77,19 @@ end
 
 function pairsByKeys (t, f)
   local a = {}
-  for n in pairs(t) do table.insert(a, n) end
+  for n in pairs(t) do
+    table.insert(a, n)
+  end
   table.sort(a, f)
   local i = 0      -- iterator variable
   local iter = function ()   -- iterator function
-    i = i + 1
-    if a[i] == nil then return nil
-    else return a[i], t[a[i]]
-    end
-  end
+                 i = i + 1
+                 if a[i] == nil then
+                   return nil
+                 else
+                   return a[i], t[a[i]]
+                 end
+               end
   return iter
 end
 
@@ -94,9 +98,8 @@ end
 -------------
 
 function read(addr, size, bigEndianFlag)
-  if addr <= 0xFFFF then
-    mem = nil
-  else
+  mem = nil
+  if addr > 0xFFFF then
     mem = ""
     memdomain = bit.rshift(addr, 24)
     if memdomain == 0 then
@@ -110,7 +113,7 @@ function read(addr, size, bigEndianFlag)
     end
     addr = bit.band(addr, 0xFFFFFF)
   end
-  bigEndianFlag = bigEndianFlag or false
+  bigEndianFlag = bigEndianFlag or false--TODO isn't nil basically the same as false?????
   if size == 1 then
     return memory.read_u8(addr,mem)
   elseif bigEndianFlag then
@@ -150,9 +153,9 @@ function split(inputstr, sep)
   local t={}
   for field, s in string.gmatch(inputstr, "([^" .. sep .. "]*)(" .. sep .. "?)") do
     table.insert(t, field)
-  if s=="" then
-    return t
-  end
+    if s=="" then
+      return t
+    end
   end
 end
 
